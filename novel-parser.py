@@ -23,19 +23,32 @@ grammar = Grammar(
 
 class NovelVisitor(NodeVisitor):
   def visit_novel(self, node, visited_children):
-    return visited_children
+    summary, volumes = visited_children
+    summary = '# ' + summary.strip() + '\n'
+    novel = summary
+    for volume in volumes:
+      novel = novel + volume.strip() + '\n'
+    return novel
 
   
   def visit_role(self, node, visited_children):
-    role_name, _, chapters = visited_children
+    role_name, preface, chapters = visited_children
+    role_name = '# ' + role_name.strip() + '\n'
+    if preface.strip() != "":
+      preface = '## ' + preface.strip() + '\n'
     print(f"{role_name} scanned, {len(chapters)} chapters in total")
-    return {role_name: chapters}
+    volume = role_name + preface
+    for chapter in chapters:
+      volume = volume + chapter.strip() + '\n'
+    return volume
 
 
   def visit_chapter(self, node, visited_children):
     chapter_name, chapter_body = visited_children
+    chapter_name = '## ' + chapter_name.strip() + '\n'
+    assert(len(chapter_body) == 1)
     print(f"{chapter_name} scanned")
-    return {chapter_name: chapter_body}
+    return chapter_name + chapter_body[0].strip()
 
   def generic_visit(self, node, visited_children):
     """ The generic visit method. """
