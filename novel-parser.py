@@ -2,8 +2,8 @@ from parsimonious.grammar import Grammar
 from parsimonious.nodes import NodeVisitor
 import sys
 
-volume_name = r'(第*)(一|二|三|四|五|六|七|八|九|十|百|[0-9]|[\u2460-\u2473\u3251-\u325F\u32B1-\u32BF])+(卷)\s+.*'
-chapter_name = r'(第*)(一|二|三|四|五|六|七|八|九|十|百|[0-9]|[\u2460-\u2473\u3251-\u325F\u32B1-\u32BF])+(章)\s+.*'
+volume_name = r'第(一|二|三|四|五|六|七|八|九|十|百|[0-9]|[\u2460-\u2473\u3251-\u325F\u32B1-\u32BF])+卷\s+\w+\s*'
+chapter_name = r'第(一|二|三|四|五|六|七|八|九|十|百|[0-9]|[\u2460-\u2473\u3251-\u325F\u32B1-\u32BF])+章\s+\w+\s*'
 
 grammar = Grammar(
   fr"""
@@ -15,7 +15,7 @@ grammar = Grammar(
 
   chapter_name = ~r'{chapter_name}'
   volume_name = ~r'{volume_name}'
-  chapter_body = ~r'[\S\s]*?(?={chapter_name}|{volume_name})'
+  chapter_body = ~r'[\S\s]*?(?={volume_name}|{chapter_name})'
   last_body = ~r'[\S\s]*'
   """
 )
@@ -33,10 +33,13 @@ class NovelVisitor(NodeVisitor):
   
   def visit_volume(self, node, visited_children):
     volume_name, preface, chapters = visited_children
-    if volume_name != "":
+    if volume_name:
+      assert(len(volume_name) == 1)
+      volume_name = volume_name[0]
       volume_name = '# ' + volume_name.strip() + '\n'
     if preface.strip() != "":
       preface = '## ' + preface.strip() + '\n'
+      print(f"{preface[0:10]} scanned")
     print(f"{volume_name} scanned, {len(chapters)} chapters in total")
     volume = volume_name + preface
     for chapter in chapters:
