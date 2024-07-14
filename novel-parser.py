@@ -2,8 +2,9 @@ from parsimonious.grammar import Grammar
 from parsimonious.nodes import NodeVisitor
 import sys
 
+
+chapter_name = r'第(一|二|三|四|五|六|七|八|九|十|百|[0-9]|[\u2460-\u2473\u3251-\u325F\u32B1-\u32BF])+章\s+.+\s*'
 volume_name = r'第(一|二|三|四|五|六|七|八|九|十|百|[0-9]|[\u2460-\u2473\u3251-\u325F\u32B1-\u32BF])+卷\s+\w+\s*'
-chapter_name = r'第(一|二|三|四|五|六|七|八|九|十|百|[0-9]|[\u2460-\u2473\u3251-\u325F\u32B1-\u32BF])+章\s+\w+\s*'
 
 grammar = Grammar(
   fr"""
@@ -33,6 +34,7 @@ class NovelVisitor(NodeVisitor):
   
   def visit_volume(self, node, visited_children):
     volume_name, preface, chapters = visited_children
+
     if volume_name:
       assert(len(volume_name) == 1)
       volume_name = volume_name[0]
